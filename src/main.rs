@@ -2,12 +2,15 @@ use anyhow::{bail, ensure, Context};
 use chrono::{DateTime, Utc};
 use serde::{de::DeserializeOwned, Deserialize};
 
+const ME_ENDPOINT: &str = "v1/me";
+const TRANSACTIONS_ENDPOINT: &str = "v1/transactions";
+
 #[tokio::main]
 async fn main() {
-    let me = akahu_get_single::<Me>("v1/me").await.unwrap();
+    let me = akahu_get_single::<Me>(ME_ENDPOINT).await.unwrap();
     println!("{me:?}");
 
-    let transactions = akahu_get_multiple::<Transaction>("v1/transactions")
+    let transactions = akahu_get_multiple::<Transaction>(TRANSACTIONS_ENDPOINT)
         .await
         .unwrap();
 
@@ -73,6 +76,7 @@ struct ResponseMultipleItems<T> {
     message: Option<String>,
 }
 
+/// Me model. https://developers.akahu.nz/reference/get_me
 #[allow(unused)]
 #[derive(Deserialize, Debug)]
 struct Me {
@@ -86,6 +90,7 @@ struct Me {
     preferred_name: Option<String>,
 }
 
+/// Transaction model. https://developers.akahu.nz/reference/get_transactions
 #[allow(unused)]
 #[derive(Debug, Deserialize)]
 struct Transaction {
