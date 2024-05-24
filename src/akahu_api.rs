@@ -2,6 +2,8 @@ use anyhow::{bail, ensure, Context};
 use chrono::{DateTime, Utc};
 use serde::{de::DeserializeOwned, Deserialize};
 
+use crate::{AKAHU_APP_TOKEN, AKAHU_USER_TOKEN};
+
 const ME_ENDPOINT: &str = "v1/me";
 const TRANSACTIONS_ENDPOINT: &str = "v1/transactions";
 
@@ -110,8 +112,8 @@ async fn akahu_get_internal<T: DeserializeOwned>(endpoint: &str) -> Result<T, an
     let client = reqwest::Client::new();
     client
         .get(format!("https://api.akahu.io/{endpoint}"))
-        .bearer_auth("")
-        .header("X-Akahu-ID", "")
+        .bearer_auth(AKAHU_USER_TOKEN)
+        .header("X-Akahu-ID", AKAHU_APP_TOKEN)
         .send()
         .await
         .with_context(|| format!("Fetching from {endpoint}"))?
