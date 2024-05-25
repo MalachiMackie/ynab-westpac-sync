@@ -1,6 +1,8 @@
 mod akahu_api;
 mod ynab_api;
 
+use ynab_api::get_accounts;
+
 use crate::{
     akahu_api::{akahu_get_me, akahu_get_transactions},
     ynab_api::{get_budgets, get_payees},

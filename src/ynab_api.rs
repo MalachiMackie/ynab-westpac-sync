@@ -4,11 +4,11 @@ use serde::{de::DeserializeOwned, Deserialize};
 
 use crate::YNAB_TOKEN;
 
-pub async fn get_budgets() -> Result<Box<[Budget]>, anyhow::Error> {
+pub async fn get_budgets() -> anyhow::Result<Box<[Budget]>> {
     Ok(ynab_get::<BudgetsResponse>("budgets").await?.budgets)
 }
 
-pub async fn get_payees(budget_id: &str) -> Result<Box<[Payee]>, anyhow::Error> {
+pub async fn get_payees(budget_id: &str) -> anyhow::Result<Box<[Payee]>> {
     Ok(
         ynab_get::<PayeesResponse>(&format!("budgets/{budget_id}/payees"))
             .await?
@@ -16,7 +16,15 @@ pub async fn get_payees(budget_id: &str) -> Result<Box<[Payee]>, anyhow::Error> 
     )
 }
 
-async fn ynab_get<T: DeserializeOwned>(endpoint_relative_path: &str) -> Result<T, anyhow::Error> {
+pub async fn get_accounts(budget_id: &str) -> anyhow::Result<Box<[Account]>> {
+    Ok(
+        ynab_get::<AccountsResponse>(&format!("budgets/{budget_id}/accounts"))
+            .await?
+            .accounts,
+    )
+}
+
+async fn ynab_get<T: DeserializeOwned>(endpoint_relative_path: &str) -> anyhow::Result<T> {
     let client = reqwest::Client::new();
     let response = client
         .get(format!("https://api.ynab.com/v1/{endpoint_relative_path}"))
@@ -38,13 +46,13 @@ async fn ynab_get<T: DeserializeOwned>(endpoint_relative_path: &str) -> Result<T
 }
 
 #[derive(Deserialize, Debug)]
-pub struct YnabResponse<T> {
+struct YnabResponse<T> {
     data: Option<T>,
     error: Option<YnabError>,
 }
 
 #[derive(Deserialize, Debug)]
-pub struct YnabError {
+struct YnabError {
     id: String,
     name: String,
     detail: String,
@@ -57,32 +65,37 @@ struct BudgetsResponse {
 
 #[derive(Deserialize, Debug)]
 pub struct Budget {
-    id: String,
-    name: String,
-    last_modified_on: String,
-    first_month: NaiveDate,
-    last_month: NaiveDate,
-    accounts: Option<Box<[Account]>>,
+    pub id: String,
+    pub name: String,
+    pub last_modified_on: String,
+    pub first_month: NaiveDate,
+    pub last_month: NaiveDate,
+    pub accounts: Option<Box<[Account]>>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AccountsResponse {
+    accounts: Box<[Account]>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct Account {
-    id: String,
-    name: String,
+    pub id: String,
+    pub name: String,
     #[serde(rename = "type")]
-    account_type: String,
-    on_budget: bool,
-    closed: bool,
-    node: String,
-    balance: f32,
-    cleared_balance: f32,
-    uncleared_balance: f32,
-    transfer_payee_id: String,
-    direct_import_linked: bool,
-    direct_import_in_error: bool,
-    last_reconciled_at: DateTime<Utc>,
-    debt_original_balance: f32,
-    deleted: bool,
+    pub account_type: String,
+    pub on_budget: bool,
+    pub closed: bool,
+    pub note: Option<String>,
+    pub balance: f32,
+    pub cleared_balance: f32,
+    pub uncleared_balance: f32,
+    pub transfer_payee_id: String,
+    pub direct_import_linked: bool,
+    pub direct_import_in_error: bool,
+    pub last_reconciled_at: Option<DateTime<Utc>>,
+    pub debt_original_balance: Option<f32>,
+    pub deleted: bool,
 }
 
 #[derive(Deserialize, Debug)]
@@ -92,8 +105,8 @@ struct PayeesResponse {
 
 #[derive(Deserialize, Debug)]
 pub struct Payee {
-    id: String,
-    name: String,
-    transfer_account_id: Option<String>,
-    deleted: bool,
+    pub id: String,
+    pub name: String,
+    pub transfer_account_id: Option<String>,
+    pub deleted: bool,
 }
