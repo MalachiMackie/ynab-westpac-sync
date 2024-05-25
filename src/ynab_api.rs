@@ -1,28 +1,40 @@
 use anyhow::bail;
 use chrono::{DateTime, NaiveDate, Utc};
-use serde::Deserialize;
+use serde::{de::DeserializeOwned, Deserialize};
 
 use crate::YNAB_TOKEN;
 
 pub async fn get_budgets() -> Result<Box<[Budget]>, anyhow::Error> {
+    Ok(ynab_get::<BudgetsResponse>("budgets").await?.budgets)
+}
+
+pub async fn get_payees(budget_id: &str) -> Result<Box<[Payee]>, anyhow::Error> {
+    Ok(
+        ynab_get::<PayeesResponse>(&format!("budgets/{budget_id}/payees"))
+            .await?
+            .payees,
+    )
+}
+
+async fn ynab_get<T: DeserializeOwned>(endpoint_relative_path: &str) -> Result<T, anyhow::Error> {
     let client = reqwest::Client::new();
     let response = client
-        .get("https://api.ynab.com/v1/budgets")
+        .get(format!("https://api.ynab.com/v1/{endpoint_relative_path}"))
         .bearer_auth(YNAB_TOKEN)
         .send()
         .await?
-        .json::<YnabResponse<BudgetsResponse>>()
+        .json::<YnabResponse<T>>()
         .await?;
 
-    let Some(budgets) = response.data else {
+    let Some(data) = response.data else {
         if let Some(error) = response.error {
             bail!("{}: {}", error.name, error.detail);
         } else {
-            bail!("Failed to get budgets with an unknown error");
+            bail!("Failed to get resource from {endpoint_relative_path}");
         }
     };
 
-    Ok(budgets.budgets)
+    Ok(data)
 }
 
 #[derive(Deserialize, Debug)]
@@ -70,5 +82,18 @@ pub struct Account {
     direct_import_in_error: bool,
     last_reconciled_at: DateTime<Utc>,
     debt_original_balance: f32,
+    deleted: bool,
+}
+
+#[derive(Deserialize, Debug)]
+struct PayeesResponse {
+    payees: Box<[Payee]>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Payee {
+    id: String,
+    name: String,
+    transfer_account_id: Option<String>,
     deleted: bool,
 }
