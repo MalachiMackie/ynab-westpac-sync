@@ -16,8 +16,16 @@ pub const YNAB_TOKEN: &str = "";
 #[tokio::main]
 async fn main() {}
 
-// 1. get akahu accounts
-// 2. get akahu transactions
-// 3. get ynab accounts
-// 4. get ynab transactions
+// 1. get akahu accounts - done
+// 2. get akahu transactions - done
+// 3. get ynab accounts - done
+// 4. get ynab transactions - done
 // 5. link akahu accounts to ynab accounts
+// 6. find akahu transactions that aren't in ynab
+//  - ?
+// 7. post ynab transactions
+// MVP finished
+// 8. get ynab categories
+// 9. create rules for auto-categorization
+// 10. filter ynab transactions that dont have categories
+// 11. try and find categories using rules
