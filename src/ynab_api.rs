@@ -4,11 +4,11 @@ use serde::{de::DeserializeOwned, Deserialize};
 
 use crate::YNAB_TOKEN;
 
-pub async fn get_budgets() -> anyhow::Result<Box<[Budget]>> {
+pub async fn ynab_get_budgets() -> anyhow::Result<Box<[Budget]>> {
     Ok(ynab_get::<BudgetsResponse>("budgets").await?.budgets)
 }
 
-pub async fn get_payees(budget_id: &str) -> anyhow::Result<Box<[Payee]>> {
+pub async fn ynab_get_payees(budget_id: &str) -> anyhow::Result<Box<[Payee]>> {
     Ok(
         ynab_get::<PayeesResponse>(&format!("budgets/{budget_id}/payees"))
             .await?
@@ -16,7 +16,7 @@ pub async fn get_payees(budget_id: &str) -> anyhow::Result<Box<[Payee]>> {
     )
 }
 
-pub async fn get_accounts(budget_id: &str) -> anyhow::Result<Box<[Account]>> {
+pub async fn ynab_get_accounts(budget_id: &str) -> anyhow::Result<Box<[Account]>> {
     Ok(
         ynab_get::<AccountsResponse>(&format!("budgets/{budget_id}/accounts"))
             .await?
@@ -87,14 +87,14 @@ pub struct Account {
     pub on_budget: bool,
     pub closed: bool,
     pub note: Option<String>,
-    pub balance: f32,
-    pub cleared_balance: f32,
-    pub uncleared_balance: f32,
+    pub balance: i32,
+    pub cleared_balance: i32,
+    pub uncleared_balance: i32,
     pub transfer_payee_id: String,
     pub direct_import_linked: bool,
     pub direct_import_in_error: bool,
     pub last_reconciled_at: Option<DateTime<Utc>>,
-    pub debt_original_balance: Option<f32>,
+    pub debt_original_balance: Option<i32>,
     pub deleted: bool,
 }
 
