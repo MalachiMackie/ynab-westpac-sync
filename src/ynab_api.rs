@@ -82,7 +82,7 @@ pub struct AccountsResponse {
 pub struct Account {
     pub id: String,
     pub name: String,
-    #[serde(rename = "type")]
+    #[serde(alias = "type")]
     pub account_type: String,
     pub on_budget: bool,
     pub closed: bool,

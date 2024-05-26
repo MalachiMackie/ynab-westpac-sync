@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use anyhow::{bail, ensure, Context};
 use chrono::{DateTime, Utc};
 use serde::{de::DeserializeOwned, Deserialize};
@@ -6,9 +8,14 @@ use crate::{AKAHU_APP_TOKEN, AKAHU_USER_TOKEN};
 
 const ME_ENDPOINT: &str = "v1/me";
 const TRANSACTIONS_ENDPOINT: &str = "v1/transactions";
+const ACCOUNTS_ENDPOINT: &str = "v1/accounts";
 
 pub async fn akahu_get_transactions() -> Result<Box<[Transaction]>, anyhow::Error> {
     akahu_get_multiple::<Transaction>(TRANSACTIONS_ENDPOINT).await
+}
+
+pub async fn akahu_get_accounts() -> anyhow::Result<Box<[Account]>> {
+    akahu_get_multiple::<Account>(ACCOUNTS_ENDPOINT).await
 }
 
 pub async fn akahu_get_me() -> Result<Me, anyhow::Error> {
@@ -27,6 +34,83 @@ pub struct Me {
     first_name: Option<String>,
     last_name: Option<String>,
     preferred_name: Option<String>,
+}
+
+/// Account model. https://developers.akahu.nz/reference/get_accounts
+#[derive(Deserialize, Debug)]
+pub struct Account {
+    #[serde(alias = "_id")]
+    id: String,
+    #[serde(alias = "_credentials")]
+    credentials: String,
+    connection: AccountConnection,
+    name: String,
+    status: AccountStatus,
+    balance: Option<AccountBalance>,
+    #[serde(alias = "type")]
+    account_type: AccountType,
+    attributes: Box<[AccountAttribute]>,
+    formatted_account: Option<String>,
+    meta: Option<HashMap<String, String>>,
+    refreshed: AccountRefreshedObject,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AccountRefreshedObject {
+    balance: DateTime<Utc>,
+    meta: DateTime<Utc>,
+    transactions: DateTime<Utc>,
+    party: DateTime<Utc>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum AccountStatus {
+    Active,
+    Inactive,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AccountBalance {
+    currency: String,
+    current: f32,
+    available: f32,
+    limit: Option<f32>,
+    overdrawn: bool,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AccountConnection {
+    #[serde(alias = "_id")]
+    id: String,
+    name: String,
+    logo: String,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum AccountType {
+    Checking,
+    Savings,
+    CreditCard,
+    Loan,
+    Kiwisaver,
+    Investment,
+    TermDeposit,
+    Foreign,
+    Tax,
+    Rewards,
+    Wallet,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum AccountAttribute {
+    Transactions,
+    TransferTo,
+    TransferFrom,
+    PaymentTo,
+    PaymentFrom,
 }
 
 /// Transaction model. https://developers.akahu.nz/reference/get_transactions
