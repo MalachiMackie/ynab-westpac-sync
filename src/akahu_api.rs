@@ -40,27 +40,27 @@ pub struct Me {
 #[derive(Deserialize, Debug)]
 pub struct Account {
     #[serde(alias = "_id")]
-    id: String,
+    pub id: String,
     #[serde(alias = "_credentials")]
-    credentials: String,
-    connection: AccountConnection,
-    name: String,
-    status: AccountStatus,
-    balance: Option<AccountBalance>,
+    pub credentials: String,
+    pub connection: AccountConnection,
+    pub name: String,
+    pub status: AccountStatus,
+    pub balance: Option<AccountBalance>,
     #[serde(alias = "type")]
-    account_type: AccountType,
-    attributes: Box<[AccountAttribute]>,
-    formatted_account: Option<String>,
-    meta: Option<HashMap<String, String>>,
-    refreshed: AccountRefreshedObject,
+    pub account_type: AccountType,
+    pub attributes: Box<[AccountAttribute]>,
+    pub formatted_account: Option<String>,
+    pub meta: Option<HashMap<String, String>>,
+    pub refreshed: AccountRefreshedObject,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct AccountRefreshedObject {
-    balance: DateTime<Utc>,
-    meta: DateTime<Utc>,
-    transactions: DateTime<Utc>,
-    party: DateTime<Utc>,
+    pub balance: DateTime<Utc>,
+    pub meta: DateTime<Utc>,
+    pub transactions: DateTime<Utc>,
+    pub party: DateTime<Utc>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -72,19 +72,19 @@ pub enum AccountStatus {
 
 #[derive(Deserialize, Debug)]
 pub struct AccountBalance {
-    currency: String,
-    current: f32,
-    available: f32,
-    limit: Option<f32>,
-    overdrawn: bool,
+    pub currency: String,
+    pub current: f32,
+    pub available: f32,
+    pub limit: Option<f32>,
+    pub overdrawn: bool,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct AccountConnection {
     #[serde(alias = "_id")]
-    id: String,
-    name: String,
-    logo: String,
+    pub id: String,
+    pub name: String,
+    pub logo: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -118,27 +118,27 @@ pub enum AccountAttribute {
 #[derive(Debug, Deserialize)]
 pub struct Transaction {
     #[serde(alias = "_id")]
-    id: String,
+    pub id: String,
     #[serde(alias = "_account")]
-    account: String,
+    pub account: String,
     #[serde(alias = "_connection")]
-    connection: String,
+    pub connection: String,
     #[serde(alias = "_user")]
-    user: String,
+    pub user: String,
     /// timestamp the transaction was retrieved and created by akahu
     #[serde(alias = "created_at")]
-    akahu_created_at: DateTime<Utc>,
+    pub akahu_created_at: DateTime<Utc>,
     /// timestamp the transaction was last updated by akahu
     #[serde(alias = "updated_at")]
-    akahu_updated_at: DateTime<Utc>,
+    pub akahu_updated_at: DateTime<Utc>,
     #[serde(alias = "date")]
-    transaction_date: DateTime<Utc>,
-    description: String,
-    amount: f32,
+    pub transaction_date: DateTime<Utc>,
+    pub description: String,
+    pub amount: f32,
     /// the balance after the transaction
-    balance: f32,
+    pub balance: f32,
     #[serde(alias = "type")]
-    transaction_type: TransactionType,
+    pub transaction_type: TransactionType,
 }
 
 #[derive(Deserialize, Debug)]
