@@ -1,3 +1,4 @@
+#![allow(unused)]
 use anyhow::bail;
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{de::DeserializeOwned, Deserialize};
