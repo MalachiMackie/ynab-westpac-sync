@@ -2,9 +2,9 @@ use anyhow::bail;
 use std::collections::HashMap;
 
 use crate::{
-    akahu_api::{self, akahu_get_accounts},
+    api::akahu_api::{self, akahu_get_accounts},
+    api::ynab_api::{self, ynab_get_accounts, ynab_get_budgets, Budget},
     io::{flush_stdout, read_u32},
-    ynab_api::{self, ynab_get_accounts, ynab_get_budgets, Budget},
 };
 
 pub async fn process() -> anyhow::Result<()> {

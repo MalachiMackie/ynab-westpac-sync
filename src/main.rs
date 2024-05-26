@@ -1,7 +1,6 @@
-mod akahu_api;
+mod api;
 mod io;
 mod process;
-mod ynab_api;
 
 use process::process;
 
