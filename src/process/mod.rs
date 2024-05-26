@@ -2,13 +2,19 @@ use anyhow::bail;
 use std::collections::HashMap;
 
 use crate::{
-    api::akahu_api::{self, akahu_get_accounts},
-    api::ynab_api::{self, ynab_get_accounts, ynab_get_budgets, Budget},
+    api::{
+        akahu_api::{self, akahu_get_accounts, akahu_get_transactions},
+        ynab_api::{self, ynab_get_accounts, ynab_get_budgets, ynab_get_transactions, Budget},
+    },
     io::{flush_stdout, read_u32},
 };
 
 pub async fn process() -> anyhow::Result<()> {
-    let (akahu_accounts, ynab_budgets) = tokio::join!(akahu_get_accounts(), ynab_get_budgets());
+    let (akahu_accounts, ynab_budgets, akahu_transactions) = tokio::join!(
+        akahu_get_accounts(),
+        ynab_get_budgets(),
+        akahu_get_transactions()
+    );
     let akahu_accounts = akahu_accounts?;
     let ynab_budgets = ynab_budgets?;
 
@@ -18,7 +24,9 @@ pub async fn process() -> anyhow::Result<()> {
 
     let account_map = get_account_map(&ynab_accounts, &akahu_accounts).await?;
 
-    println!("{account_map:#?}");
+    let ynab_transactions = ynab_get_transactions(&selected_budget.id).await?;
+    println!("{ynab_transactions:#?}");
+
     Ok(())
 }
 

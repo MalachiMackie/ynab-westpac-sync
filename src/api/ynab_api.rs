@@ -25,6 +25,14 @@ pub async fn ynab_get_accounts(budget_id: &str) -> anyhow::Result<Box<[Account]>
     )
 }
 
+pub async fn ynab_get_transactions(budget_id: &str) -> anyhow::Result<Box<[Transaction]>> {
+    Ok(
+        ynab_get::<TransactionsResponse>(&format!("budgets/{budget_id}/transactions"))
+            .await?
+            .transactions,
+    )
+}
+
 async fn ynab_get<T: DeserializeOwned>(endpoint_relative_path: &str) -> anyhow::Result<T> {
     let client = reqwest::Client::new();
     let response = client
@@ -44,6 +52,19 @@ async fn ynab_get<T: DeserializeOwned>(endpoint_relative_path: &str) -> anyhow::
     };
 
     Ok(data)
+}
+
+async fn ynab_get_debug<T: DeserializeOwned>(endpoint_relative_path: &str) -> anyhow::Result<T> {
+    let client = reqwest::Client::new();
+    let response = client
+        .get(format!("https://api.ynab.com/v1/{endpoint_relative_path}"))
+        .bearer_auth(YNAB_TOKEN)
+        .send()
+        .await?
+        .text()
+        .await?;
+
+    panic!("{response}");
 }
 
 #[derive(Deserialize, Debug)]
@@ -109,5 +130,52 @@ pub struct Payee {
     pub id: String,
     pub name: String,
     pub transfer_account_id: Option<String>,
+    pub deleted: bool,
+}
+
+#[derive(Deserialize)]
+struct TransactionsResponse {
+    transactions: Box<[Transaction]>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Transaction {
+    pub id: String,
+    pub date: NaiveDate,
+    pub amount: i32,
+    pub memo: Option<String>,
+    pub cleared: Option<String>,
+    pub approved: bool,
+    pub flag_color: Option<String>,
+    pub flag_name: Option<String>,
+    pub account_id: String,
+    pub payee_id: Option<String>,
+    pub category_id: Option<String>,
+    pub transfer_account_id: Option<String>,
+    pub transfer_transaction_id: Option<String>,
+    pub matched_transaction_id: Option<String>,
+    pub import_id: Option<String>,
+    pub import_payee_name: Option<String>,
+    pub import_payee_name_original: Option<String>,
+    pub debt_transaction_type: Option<String>,
+    pub deleted: bool,
+    pub account_name: String,
+    pub payee_name: Option<String>,
+    pub category_name: Option<String>,
+    pub subtransactions: Box<[SubTransaction]>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct SubTransaction {
+    pub id: String,
+    pub transaction_id: String,
+    pub amount: i32,
+    pub memo: Option<String>,
+    pub payee_id: Option<String>,
+    pub payee_name: Option<String>,
+    pub category_id: Option<String>,
+    pub category_name: Option<String>,
+    pub transfer_account_id: Option<String>,
+    pub transfer_transaction_id: Option<String>,
     pub deleted: bool,
 }
